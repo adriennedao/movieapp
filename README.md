@@ -1,5 +1,4 @@
 # movieapp
-# UDEMY Course
+# udemy.com
 
-## To Start App
-## npm start 
+## npm start
