@@ -9,7 +9,7 @@ class SearchBar extends Component {
 
     timeout = null;
 
-    doSearch = (event) => 
+    doSearch = (event) => {
         this.setState({ value: event.target.value})
         clearTimeout(this.timeout);
 
@@ -17,7 +17,7 @@ class SearchBar extends Component {
             this.props.callback(this.state.value);
         }, 500);
     }
-    
+
     render(){
         return (
             <div className="rmdb-searchbar">
