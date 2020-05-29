@@ -17,12 +17,16 @@ class Movie extends Component {
     }
 
     componentDidMount() {
+        if (localStorage.getItem(`${this.props.match.params.movieId}`)) {
+           const state = JSON.parse(localStorage.getItem(`${this.props.match.params.movieId}`));
+           this.setState({ ...state});
+        } else {
         this.setState({ loading: true })
         // First fetch the movie ...
         const endpoint = `${API_URL}movie/${this.props.match.params.movieId}?api_key=${API_KEY}&language=en-US`;
         this.fetchItems(endpoint);
     }
-
+}
     fetchItems = (endpoint) => {
         fetch(endpoint)
         .then(result => result.json())
@@ -38,11 +42,12 @@ class Movie extends Component {
                   .then(result => result.json())
                   .then(result => {
                       const directors = result.crew.filter( (member) => member.job === "Director");
-
                       this.setState({
                           actors: result.cast,
                           directors,
                           loading: false 
+                      }, () => {
+                          localStorage.getItem(`${this.props.match.params.movieId}`, JSON.stringify(this.state));                    
                       })
                   })
                 })
@@ -50,16 +55,34 @@ class Movie extends Component {
       })
         .catch(error => console.error('Error:', error))
     }
+
     render() {
+        const { movieName } = this.props.location;
+        const { movie, directors, actors, loading } = this.state;
+
         return (
             <div className="rmdb-movie">
-                <Navigation />
-                <MovieInfo />
-                <MovieInfoBar />
-                <Spinner />
+              {movie ? 
+              <div>
+                  <Navigation movie={movieName} />
+                  <MovieInfo movie={movie} directors={directors} />
+                  <MovieInfoBar time={movie.runtime} budget={this.state.movie.budget} revenue={this.state.movie.revenue} />  
+            </div>              
+                  : null }
+                  {actors ?
+                  <div className="rmdb-movie-grid">    
+                      <FourColGrid header={'Actors'} >
+                          {this.state.actors.map( (element, i) => (
+                            <Actor key={i} actor={element} />
+                          ))}
+                      </FourColGrid >
+                  </div>
+                  : null }
+                  {!this.state.actors && !this.state.loading ? <h1>No Movie Found!</h1> : null }
+                  {loading ? <Spinner /> : null}                 
             </div>
-        )
-    }
+        )                        
+    }   
 }
 
 export default Movie;
